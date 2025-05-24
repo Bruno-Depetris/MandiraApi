@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<MandiraDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("MandiraDb"),
-        new MySqlServerVersion(new Version(8, 0, 0)) // Asegurate de ajustar si estás usando otra versión
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MandiraDb"))
     )
 );
 
