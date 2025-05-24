@@ -1,30 +1,24 @@
-# Imagen base para ASP.NET Core en tiempo de ejecución
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-# Imagen base para construir el proyecto
+# Etapa de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-
-# Copiamos el archivo del proyecto
-COPY MandiraAPI.csproj ./
-RUN dotnet restore MandiraAPI.csproj
-
-# Copiamos el resto del código
-COPY . ./
-WORKDIR /src
-RUN dotnet build MandiraAPI.csproj -c Release -o /app/build
-
-# Publicamos el proyecto
-FROM build AS publish
-RUN dotnet publish MandiraAPI.csproj -c Release -o /app/publish /p:UseAppHost=false
-
-# Imagen final
-FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
 
-# Comando por defecto al ejecutar el contenedor
+# Copiar el archivo del proyecto y restaurar dependencias
+COPY MandiraAPI.csproj ./
+RUN dotnet restore
+
+# Copiar el resto del código y publicar en Release
+COPY . ./
+RUN dotnet publish -c Release -o out /p:UseAppHost=false
+
+# Etapa de runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+
+# Copiar los archivos publicados desde la etapa build
+COPY --from=build /app/out ./
+
+# Exponer puerto 80 (http)
+EXPOSE 80
+
+# Comando de inicio
 ENTRYPOINT ["dotnet", "MandiraAPI.dll"]
