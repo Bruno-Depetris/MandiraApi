@@ -1,18 +1,22 @@
-# Etapa 1: Build
+# Etapa de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copiar y restaurar dependencias
-COPY *.csproj ./
+# Copiar los archivos y restaurar dependencias
+COPY *.csproj .
 RUN dotnet restore
 
-# Copiar todo y publicar
-COPY . ./
-RUN dotnet publish -c Release -o /app/out
+# Copiar el resto del código y compilar
+COPY . .
+RUN dotnet publish -c Release -o out
 
-# Etapa 2: Runtime
+# Etapa de runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/out ./
+COPY --from=build /app/out .
 
-ENTRYPOINT ["dotnet", "MandiraAPI.dll"]
+# Puerto que va a escuchar
+EXPOSE 80
+
+# Comando de inicio
+ENTRYPOINT ["dotnet", "MandiraApi.dll"]
