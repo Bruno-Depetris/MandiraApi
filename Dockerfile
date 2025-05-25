@@ -1,31 +1,18 @@
-# Etapa base para runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-# Etapa build
+# Etapa 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# Copiar el archivo de proyecto (está en la raíz)
+# Copiar y restaurar dependencias
 COPY *.csproj ./
-
-# Restaurar dependencias
 RUN dotnet restore
 
-# Copiar todo el código fuente (todo el contenido de la raíz del proyecto)
-COPY . .
+# Copiar todo y publicar
+COPY . ./
+RUN dotnet publish -c Release -o /app/out
 
-# Construir el proyecto en Release
-RUN dotnet build -c Release -o /app/build
-
-# Publicar el proyecto
-FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
-
-# Imagen final
-FROM base AS final
+# Etapa 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/out ./
+
 ENTRYPOINT ["dotnet", "MandiraAPI.dll"]
