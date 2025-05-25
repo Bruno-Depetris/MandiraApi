@@ -1,39 +1,22 @@
-# Etapa base para runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-# Etapa build
+# Etapa de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-# Imagen base oficial de .NET SDK
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-
-# Copiar el archivo .csproj y restaurar las dependencias
-COPY *.csproj ./
+# Copiar los archivos y restaurar dependencias
+COPY *.csproj .
 RUN dotnet restore
 
-# Copiar todo el código fuente restante
-COPY . ./
+# Copiar el resto del código y compilar
+COPY . .
+RUN dotnet publish -c Release -o out
 
-# Compilar el proyecto en modo Release
-RUN dotnet build -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish -c Release -o /app/publish
-
-FROM base AS final
+# Etapa de runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
+COPY --from=build /app/out .
 
-# Variables de entorno
-ENV ASPNETCORE_URLS=http://+:80
+# Puerto que va a escuchar
+EXPOSE 80
 
-COPY --from=publish /app/publish .
-
+# Comando de inicio
 ENTRYPOINT ["dotnet", "MandiraApi.dll"]
