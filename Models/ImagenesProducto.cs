@@ -11,5 +11,7 @@ public partial class ImagenesProducto
 
     public string Url { get; set; } = null!;
 
+    public byte[]? Imagen { get; set; }
+
     public virtual Producto? Producto { get; set; }
 }

@@ -115,6 +115,7 @@ public partial class MandiraDbContext : DbContext
             entity.HasIndex(e => e.ProductoId, "productoID");
 
             entity.Property(e => e.ImagenProductoId).HasColumnName("imagenProductoID");
+            entity.Property(e => e.Imagen).HasColumnName("imagen");
             entity.Property(e => e.ProductoId).HasColumnName("productoID");
             entity.Property(e => e.Url)
                 .HasColumnType("text")

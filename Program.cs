@@ -1,5 +1,6 @@
+using MandiraApi.Data;
 using Microsoft.EntityFrameworkCore;
-using MandiraApi.Data; // Asegurate que el namespace sea correcto
+
 
 var builder = WebApplication.CreateBuilder(args);
 
