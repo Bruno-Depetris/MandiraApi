@@ -83,6 +83,28 @@ namespace MandiraApi.Controllers
 
             return CreatedAtAction("GetImagenesProducto", new { id = imagenesProducto.ImagenProductoId }, imagenesProducto);
         }
+        // POST: api/ImagenesProductoes/upload
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadImage([FromForm] ImagenUploadDto dto) {
+            if (dto.Imagen == null || dto.Imagen.Length == 0) {
+                return BadRequest("No se proporcionó una imagen.");
+            }
+
+            using var ms = new MemoryStream();
+            await dto.Imagen.CopyToAsync(ms);
+            var imageBytes = ms.ToArray();
+
+            var nuevaImagen = new ImagenesProducto {
+                ProductoId = dto.ProductoId,
+                Imagen = imageBytes,
+                Url = "null" // Podés generar una URL si querés servirla luego
+            };
+
+            _context.ImagenesProductos.Add(nuevaImagen);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetImagenesProducto", new { id = nuevaImagen.ImagenProductoId }, nuevaImagen);
+        }
 
         // DELETE: api/ImagenesProductoes/5
         [HttpDelete("{id}")]
